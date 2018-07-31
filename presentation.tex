@@ -9,6 +9,7 @@
 \DeclareSIUnit\year{yr}
 
 \newcommand{\vs}{\vspace{0.3cm}}
+\newcommand{\vc}[1]{\ensuremath{#1}}
 
 \definecolor{mygray}{gray}{0.9}
 \definecolor{RoyalBlue}{rgb}{0.25,0.41,0.88}
@@ -306,41 +307,56 @@
     \item Control input is chosen to enlarge the reachable set
 \end{itemize}
 \pause
-\begin{figure}
-    \centering
-    \begin{scaletikzpicturetowidth}{0.4\textwidth}
-    \begin{tikzpicture}[scale=\tikzscale]
-        \coordinate [label=left:\textcolor{black}{\large \(\vecbf{x}_0\)}] (x0) at (-1,-2);
-        \coordinate [label=below:\textcolor{black}{\large  \(\vecbf{x}_n\)}] (xn) at (1,1);
-        \coordinate [label=left:\textcolor{black}{\large  \(\Sigma\)}] (sigma) at (-4,3);
-        %\coordinate [label=below:\textcolor{black}{\large  \(P(\vec{x})\)}] (P) at (0,-3.5);
-        % define the path of the flow with coordinates
-        \coordinate [label=right:\textcolor{black}{}] (f1) at (5,-2);
-        \coordinate [label=below:\textcolor{black}{\large  \(\psi(t,\vecbf{x}_0)\)}] (f2) at (2,-5);
-        \coordinate [label=right:\textcolor{black}{}] (f3) at (-4,-4);
-        \coordinate [label=right:\textcolor{black}{}] (f4) at (-4,-1);
-        
-    %   \draw[help lines] (-10,-10) grid (10,10); %grid
-        \filldraw [black] (x0) circle [radius=3pt];
-        \filldraw [black] (xn) circle [radius=3pt];
-    
-        \draw [ultra thick,black,->-](x0) to[out=20,in=90,distance=2cm] (f1) to[out=-90,in=0,distance=2cm] (f2) to[out=180,in=-45,distance=2cm] (f3) to[out=135,in=-135,distance=2cm] (f4) ;
-        \draw [ultra thick, black,dashed,->] (f4) to[out=45,in=180,distance=1cm] ($(xn)-(2,0)$);
-        
-        \draw [ultra thick] plot [smooth cycle, tension=0.1, rotate=5] coordinates { (-4,-3) (4,-3) (4,3) (-4,3) };
-    
-        \draw [thick,dashed] (xn) circle [radius=2cm]; % reachability set
-    
-        \draw [thick,->] (xn) -- ($(xn) + (2.5,0)$);
-        \draw [thick,rotate=45,->] (xn) -- ($(xn) + (2.5,0)$);
-        \draw ($(xn) + (1,0)$) arc [start angle=0,end angle=45, radius=1];
-        \node [draw=none] at (2.8,1.5) {\large \(\phi_d\)};
-        \draw [decorate,decoration={brace,amplitude=5pt},rotate=45] (xn) -- ($(xn) + (2,0)$);
-        \node [draw=none] at ($ (xn) + (0,1) $) {\large \( J \)};
-    \end{tikzpicture}
-    \end{scaletikzpicturetowidth}
-\end{figure}
 
+\begin{center}
+\tdplotsetmaincoords{60}{125} % view angle in spherical coordinates
+\begin{tikzpicture}[
+    tdplot_main_coords,
+    poincare/.style={opacity=.2,very thick,fill=blue},
+    orbit/.style={very thick,black},
+    orbit hidden/.style={very thick,dashed},
+    grid/.style={very thin,black},
+    axis/.style={->,blue,thick},
+    reachability/.style={thick,blue},
+    ]
+
+        % nodes for the poincare section
+    \node[label=above:\(\Sigma\)] (upper_right) at (0,5,5) {};
+    \node[] (upper_left) at (0,1,5) {};
+    \node[] (lower_left) at (0,1,0) {};
+    \node[] (lower_right) at (0,5,0) {};
+
+    % draw poincare section
+    \draw[poincare] (upper_right.center) -- (upper_left.center) -- (lower_left.center) -- (lower_right.center) -- (upper_right.center);
+    
+    % draw a periodic orbit
+    \coordinate (center) at (0,0,2);
+    \node[label=below:\(\vc{x}_n\)] (x0) at (0,3,2) {};
+    % \node[label=below:\(\vecbf{x}_n\)] at (x0) {};
+    \filldraw (x0) circle (3pt);
+
+    % \tdplotdrawarc[orbit hidden]{(center)}{3}{90}{200}{}{};
+    \tdplotdrawarc[orbit,Latex-]{(center)}{3}{-160}{90}{}{};
+
+    % draw reachability set on the poincare section
+    \coordinate (reach) at (0,4.5,2);
+    \tdplotsetthetaplanecoords{90}
+
+    \draw[tdplot_rotated_coords,grid] (x0) -- (reach);
+    \draw[tdplot_rotated_coords,grid] (x0) -- ++(-45:1.5);
+
+    \tdplotdrawarc[tdplot_rotated_coords,grid]{(x0)}{0.5}{-45}{90}{above}{\(\theta_d\)};
+
+    % draw terminal state on reachability set
+    \node[tdplot_rotated_coords,label=above:\(\vc{x}_f\)] (xf) at ($ (x0)+(-45:1.5) $) {};
+    \filldraw (xf) circle (3pt);
+
+    \node[tdplot_rotated_coords,label=below:\(J\)] at (xf) {};
+
+    \tdplotdrawarc[tdplot_rotated_coords,reachability]{(x0)}{1.5}{0}{360}{}{};
+        % place
+\end{tikzpicture}
+\end{center}
 \end{frame} %--------------------------------------%
 
 \begin{frame}{Optimal Control Problem}
@@ -403,8 +419,7 @@
 \end{itemize}
 
 \begin{center}
-    \includegraphics[width=0.5\textwidth]{figures/initial_transfer.pdf}
-    \hfill
+    \includegraphics[width=0.5\textwidth]{figures/initial_transfer.pdf}%
     \includegraphics[width=0.5\textwidth]{figures/initial_transfer_3d.pdf}
 \end{center}
 
@@ -421,8 +436,7 @@
 \end{itemize}
 
 \begin{center}
-    \includegraphics[width=0.5\textwidth]{figures/poincare_xvsxdot.pdf}
-    \hfill
+    \includegraphics[width=0.5\textwidth]{figures/poincare_xvsxdot.pdf}%
     \includegraphics[width=0.5\textwidth]{figures/poincare_zvszdot.pdf}
 \end{center}
 
@@ -435,8 +449,7 @@
     \end{itemize}
 
     \begin{center}
-        \includegraphics[width=0.5\textwidth]{figures/trajectory.pdf}
-        \hfill
+        \includegraphics[width=0.5\textwidth]{figures/trajectory.pdf}%
         \includegraphics[width=0.5\textwidth]{figures/trajectory_3d.pdf}
     \end{center}
 
@@ -448,7 +461,7 @@
 \end{itemize}
 
 \begin{center}
-  \animategraphics[autoplay,loop,width=0.5\textwidth]{30}{./animation/body/IMG}{00001}{01499}~\hfill
+  \animategraphics[autoplay,loop,width=0.5\textwidth]{30}{./animation/body/IMG}{00001}{01499}~\hfill%
   \animategraphics[autoplay,loop,width=0.5\textwidth]{30}{./animation/inertial/IMG}{00001}{01499}
 \end{center}
 
